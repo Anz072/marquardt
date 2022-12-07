@@ -12,7 +12,6 @@
 require("dotenv").config();
 const fs = require("fs");
 const { DownloaderHelper } = require("node-downloader-helper");
-const { v4: uuidv4 } = require("uuid");
 
 const fetch = (...args) =>
   import("node-fetch").then(({ default: fetch }) => fetch(...args));
@@ -147,7 +146,7 @@ exports.downloadPDFs2 = async function (fileURL, name) {
   return new Promise((resolve) => {
     // setTimeout(() => reject(new Error("Timeout")), isPhoto ? 10000 : 60000);
 
-    const dl = new DownloaderHelper(fileURL, "./mainPdfs", {
+    const dl = new DownloaderHelper(fileURL, "./src/mainPdfs", {
       override: true,
       fileName: `${name}.pdf`,
     });

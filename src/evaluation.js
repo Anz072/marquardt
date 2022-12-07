@@ -4,12 +4,12 @@
 /* eslint no-undef: ["error", { "typeof": true }] */
 const fs = require("fs");
 
-const northData = require("./northData");
-const airtable = require("./airtable");
-const pagerank = require("./pagerank");
-const bafin = require("./bafin");
-const points = require("./points");
-const financials = require("./financials");
+const northData = require("./callContainer/northData");
+const airtable = require("./callContainer/airtable");
+const pagerank = require("./miscContainer/pagerank");
+const bafin = require("./miscContainer/bafin");
+const points = require("./miscContainer/points");
+const financials = require("./miscContainer/financials");
 require("dotenv").config();
 
 // eslint-disable-next-line func-names
@@ -73,6 +73,7 @@ exports.generator = async function (name, address, bafinKeywords) {
     response.companyData = companyUniversal?.results[0]?.company;
   } catch (e) {
     console.log(e);
+    infoContainer += e;
   }
 
   const promisesGeneralSheet = [];
@@ -92,6 +93,7 @@ exports.generator = async function (name, address, bafinKeywords) {
       promisesGeneralSheet.push(airtable1);
     } catch (e) {
       console.log(e);
+      infoContainer += e;
     }
   }
 
@@ -104,6 +106,7 @@ exports.generator = async function (name, address, bafinKeywords) {
       promisesGeneralSheet.push(airtable2);
     } catch (e) {
       console.log(e);
+      infoContainer += e;
     }
   }
 
@@ -124,6 +127,7 @@ exports.generator = async function (name, address, bafinKeywords) {
       promisesGeneralSheet.push(airtable3);
     } catch (e) {
       console.log(e);
+      infoContainer += e;
     }
   }
 
@@ -271,6 +275,7 @@ exports.generator = async function (name, address, bafinKeywords) {
     }
   } catch (e) {
     console.log(e);
+    infoContainer += e;
   }
 
   console.log("Step 1.5: Assigning financials info to response");
@@ -282,6 +287,7 @@ exports.generator = async function (name, address, bafinKeywords) {
     infoContainer += `\n---Found ${response.financials.length} Financial objects\n`;
   } catch (e) {
     console.log(e);
+    infoContainer += e;
   }
   console.log("Step 1.6: Assigning company duration info to response");
   infoContainer += "\nStep 1.6: Assigning company duration info to response\n";
@@ -290,6 +296,7 @@ exports.generator = async function (name, address, bafinKeywords) {
     response.company_duration = financials.calculateYears(universalCompanyData);
   } catch (e) {
     console.log(e);
+    infoContainer += e;
   }
   console.log("Step 1.7: Assigning capital info to response");
   infoContainer += "\nStep 1.7: Assigning capital info to response\n";
@@ -298,6 +305,7 @@ exports.generator = async function (name, address, bafinKeywords) {
     response.capital = financials.get_stocks_capital(universalCompanyData);
   } catch (e) {
     console.log(e);
+    infoContainer += e;
   }
   console.log("Step 1.8: Assigning contacts info to response");
   infoContainer += "\nStep 1.8: Assigning contacts info to response\n";
@@ -306,6 +314,7 @@ exports.generator = async function (name, address, bafinKeywords) {
     response.contacts = financials.get_contacts(universalCompanyData);
   } catch (e) {
     console.log(e);
+    infoContainer += e;
   }
   console.log("Step 1.9: Assigning founding date info to response");
   infoContainer += "\nStep 1.9: Assigning founding date info to response\n";
@@ -315,6 +324,7 @@ exports.generator = async function (name, address, bafinKeywords) {
       financials.getFoundingDate(universalCompanyData);
   } catch (e) {
     console.log(e);
+    infoContainer += e;
   }
 
   console.log("Step 1.10: Assigning last financial earnings to response");
@@ -341,7 +351,9 @@ exports.generator = async function (name, address, bafinKeywords) {
 
   if (Object.keys(response.financials).length !== 0) {
     console.log("Step 1.12: Checking for duplicates in financial earnings");
-    console.log("\nStep 1.12: Checking for duplicates in financial earnings\n");
+    infoContainer +=
+      "\nStep 1.12: Checking for duplicates in financial earnings\n";
+
     const financialsReworked = financials.checkForDuplicateFinancials(
       response.financials
     );
@@ -360,51 +372,73 @@ exports.generator = async function (name, address, bafinKeywords) {
     );
   } catch (e) {
     console.log(e);
+    infoContainer += e;
   }
   console.log("Step 1.14: Assigning trademarks to response");
+  infoContainer += "\nStep 1.14: Assigning trademarks to response\n";
+
   try {
     response.trademarks = await financials.getTechTrademarks(
       universalCompanyData
     );
   } catch (e) {
     console.log(e);
+    infoContainer += e;
   }
   console.log("Step 1.15: Assigning financials publications to response");
+  infoContainer +=
+    "\nStep 1.15: Assigning financials publications to response\n";
+
   try {
     response.points.points_financials_publications =
       await points.findFinancialsPublictionsPoints(universalCompanyData);
   } catch (e) {
     console.log(e);
+    infoContainer += e;
   }
   console.log("Step 1.16: Assigning financial points to response");
+  infoContainer += "\nStep 1.16: Assigning financial points to response\n";
+
   try {
     response.points.points_financials_trademarks =
       await points.findFinancialsTrademarksPoints(universalCompanyData);
   } catch (e) {
     console.log(e);
+    infoContainer += e;
   }
   console.log("Step 1.17: Assigning financial points to response");
+  infoContainer += "\nStep 1.17: Assigning financial points to response\n";
+
   try {
     response.points.points_financials = await points.findFinancialsPoints(
       universalCompanyData
     );
   } catch (e) {
     console.log(e);
+    infoContainer += e;
   }
   console.log("Step 1.18: Assigning trademark points to response");
+  infoContainer += "\nStep 1.18: Assigning trademark points to response\n";
+
   try {
     response.points.points_trademarks = await points.getMktgIndictorsPoints(
       universalCompanyData
     );
   } catch (e) {
     console.log(e);
+    infoContainer += e;
   }
   console.log("Step 1.19: Getting documents to assign to response");
   console.log(
     "---Assigning to response: basic sheet, shareholderlist & statute points"
   );
+  infoContainer += "\nStep 1.19: Getting documents to assign to response\n";
+  infoContainer +=
+    "---Assigning to response: basic sheet, shareholderlist & statute points\n";
 
   console.log("Step 1.20: Checking for bafin warning for the main company ");
+  infoContainer +=
+    "\nStep 1.20: Checking for bafin warning for the main company \n";
 
   const companyFullName = JSON.parse(JSON.stringify(companyData.name.name));
   const legalForm = JSON.parse(JSON.stringify(companyData.name.legalForm));
@@ -414,15 +448,21 @@ exports.generator = async function (name, address, bafinKeywords) {
   bafinKeywords.push(companyFullName, companyNameWithoutLegalForm);
 
   console.log(`---Keywords to look for in Airtable: ${bafinKeywords}`);
+  infoContainer += `---Keywords to look for in Airtable: ${bafinKeywords}`;
+
   let result22 = {};
   let isKeywordInBafinNews;
   console.log("---Receiving Bafin Airtable");
+  infoContainer += "---Receiving Bafin Airtable\n";
   try {
     result22 = await bafin.searchBaFinKeyword();
   } catch (e) {
     console.log(e);
+    infoContainer += e;
   }
   console.log("---Trying to check for a warning & assign to response");
+  infoContainer += "---Trying to check for a warning & assign to response\n";
+
   try {
     isKeywordInBafinNews = await bafin.checkKeywordsInBaFinNews(
       result22,
@@ -430,6 +470,7 @@ exports.generator = async function (name, address, bafinKeywords) {
     );
   } catch (e) {
     console.log(e);
+    infoContainer += e;
   }
 
   response.baFin_warning = isKeywordInBafinNews.bafin;
@@ -439,9 +480,12 @@ exports.generator = async function (name, address, bafinKeywords) {
 
   if (response.baFin_warning === true || response.warnungenVerb === true) {
     console.log("---Bafin Warning found, so a 1000 points is subtracted");
+    infoContainer += "---Bafin Warning found, so a 1000 points is subtracted\n";
     response.points.points_baFin = -1000;
   }
   console.log("Step 1.21: Calculating overall response points ");
+  infoContainer += "Step 1.21: Calculating overall response points\n";
+
   response.points.sumOfPoints =
     response.points.points_trademarks +
     response.points.points_basicsheet +
@@ -454,11 +498,14 @@ exports.generator = async function (name, address, bafinKeywords) {
     response.points.points_baFin;
 
   console.log(`---Bafin sum of Points: ${response.points.sumOfPoints}`);
+  infoContainer += `---Bafin sum of Points: ${response.points.sumOfPoints}`;
+
   let scroreResult = {};
   try {
     scroreResult = await airtable.airtableCall8(response.points.sumOfPoints);
   } catch (e) {
     console.log(e);
+    infoContainer += e;
   }
 
   if (!scroreResult?.records?.length) {
@@ -469,6 +516,8 @@ exports.generator = async function (name, address, bafinKeywords) {
   }
 
   console.log("Step 1.22: Retrieving info about CEO ");
+  infoContainer += "Step 1.22: Retrieving info about CEO";
+
   try {
     response.ceos = await northData.getCeos(universalCompanyData);
 
@@ -523,8 +572,9 @@ exports.generator = async function (name, address, bafinKeywords) {
     }
   } catch (e) {
     console.log(e);
+    infoContainer += e;
   }
-  fs.writeFile("newfile.txt", infoContainer, (err) => {
+  fs.writeFile("./src/log/mainLog.txt", infoContainer, (err) => {
     if (err) throw err;
     console.log("File is created successfully.");
   });

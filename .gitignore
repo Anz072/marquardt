@@ -1,7 +1,5 @@
-
 *.pdf
 .env
 *.txt
-*.txt
-*.txt
-*.txt
+node_modules
+.vscode

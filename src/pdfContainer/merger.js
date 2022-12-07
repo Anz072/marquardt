@@ -6,9 +6,9 @@ exports.mergeFunction = async function (nameArray, mergedName) {
     (async () => {
       for (let i = 0; i < nameArray.length; i += 1) {
         // eslint-disable-next-line no-await-in-loop
-        await merger.add(`./mainPdfs/${nameArray[i]}.pdf`);
+        await merger.add(`./src/mainPdfs/${nameArray[i]}.pdf`);
       }
-      await merger.save(`./mainPdfs/${mergedName}.pdf`);
+      await merger.save(`./src/mainPdfs/${mergedName}.pdf`);
       console.log("---Dossier merged");
 
       resolve();

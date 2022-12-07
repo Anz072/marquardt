@@ -2,7 +2,7 @@
 /* eslint-disable camelcase */
 /* eslint-disable func-names */
 /* eslint-disable operator-linebreak */
-const airtable = require("./airtable");
+const airtable = require("../callContainer/airtable");
 
 function filterUnique(array) {
   const unique = [];

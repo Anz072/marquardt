@@ -1,8 +1,9 @@
+/* eslint-disable comma-dangle */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-plusplus */
 /* eslint-disable operator-linebreak */
 /* eslint-disable func-names */
-const airtable = require("./airtable");
+const airtable = require("../callContainer/airtable");
 
 exports.searchBaFinKeyword = async function () {
   try {
