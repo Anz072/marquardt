@@ -10,6 +10,8 @@
 /* eslint-disable comma-dangle */
 
 const fs = require("fs");
+const fsPromises = require("fs/promises");
+
 require("dotenv").config();
 const { v4: uuidv4 } = require("uuid");
 const { send } = require("process");
@@ -19,8 +21,6 @@ const { Response } = require("./classContainer/responseClass");
 const { grandGenerator } = require("./pdfContainer/pdfGenerator");
 const { mergeFunction } = require("./pdfContainer/merger");
 
-const evaluation = require("./evaluation");
-const northData = require("./callContainer/northData");
 const bafin = require("./miscContainer/bafin");
 const airtable = require("./callContainer/airtable");
 const evaluationFunctions = require("./miscContainer/evaluationFunctions");
@@ -30,6 +30,18 @@ function generateID() {
     Math.random() * 1000
   }`.slice(-3)}`;
 }
+async function writeToFile(infoContainer) {
+  try {
+    await fsPromises.appendFile(
+      "./src/log/mainLog.txt",
+      infoContainer,
+      "utf-8"
+    );
+    console.log("WRITTEN TO FILE");
+  } catch (err) {
+    console.log("Error appending data to file", err);
+  }
+}
 
 exports.evaluate = async function (req, res) {
   let dossierId = 0;
@@ -37,9 +49,13 @@ exports.evaluate = async function (req, res) {
   let isNew = false;
   let infoContainer = "";
 
+  fs.writeFile("./src/log/mainLog.txt", "START OF LOGGING\n", (err) => {
+    if (err) {
+      console.error(err);
+    }
+  });
+
   const responseData = new Response();
-  console.log("Step 0: Check if it's a new dossier or a refresh");
-  infoContainer += "Step 0: Check if it's a new dossier or a refresh\n";
 
   if (idCheck === "" || idCheck === null || idCheck === "null") {
     dossierId = generateID();
@@ -265,10 +281,7 @@ exports.evaluate = async function (req, res) {
     infoContainer += "\nFinal data that will be sent to bubble:\n";
     infoContainer += JSON.stringify(responseCopyForLog, null, 2);
 
-    fs.appendFile("./src/log/mainLog.txt", infoContainer, (err) => {
-      if (err) throw err;
-      console.log("IS WRITTEN");
-    });
+    await writeToFile(infoContainer);
 
     console.log("---SENDING FUCNTION DEACTIVATED");
 

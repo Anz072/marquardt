@@ -3,6 +3,7 @@
 /* global item */
 /* eslint no-undef: ["error", { "typeof": true }] */
 const fs = require("fs");
+const fsPromises = require("fs/promises");
 
 const northData = require("./callContainer/northData");
 const airtable = require("./callContainer/airtable");
@@ -11,6 +12,19 @@ const bafin = require("./miscContainer/bafin");
 const points = require("./miscContainer/points");
 const financials = require("./miscContainer/financials");
 require("dotenv").config();
+
+async function writeToFile(infoContainer) {
+  try {
+    await fsPromises.appendFile(
+      "./src/log/mainLog.txt",
+      infoContainer,
+      "utf-8"
+    );
+    console.log("WRITTEN TO FILE");
+  } catch (err) {
+    console.log("Error appending data to file", err);
+  }
+}
 
 // eslint-disable-next-line func-names
 exports.generator = async function (name, address, bafinKeywords) {
@@ -91,6 +105,7 @@ exports.generator = async function (name, address, bafinKeywords) {
       infoContainer += "\nStep 1.3.1: Airtable call company status points\n";
 
       airtable1 = airtable.airtableCall_1("active");
+
       promisesGeneralSheet.push(airtable1);
     } catch (e) {
       console.log(e);
@@ -137,6 +152,8 @@ exports.generator = async function (name, address, bafinKeywords) {
     "\nStep 1.3.4: Airtable await promises & assign them to response\n";
 
   const promisesGeneralSheetResults = await Promise.all(promisesGeneralSheet);
+  infoContainer += JSON.stringify(promisesGeneralSheetResults, null, 2);
+
   let promisesGeneralSheetResultsScore = 0;
   promisesGeneralSheetResults.forEach((value) => {
     if (value?.records[0]?.fields?.points !== undefined) {
@@ -152,6 +169,8 @@ exports.generator = async function (name, address, bafinKeywords) {
   listas.push(companyData);
   let executionCounter = 0;
   const universalCompanyData = companyUniversal?.results[0]?.company;
+  infoContainer += "\nUniversal company data\n";
+  infoContainer += JSON.stringify(universalCompanyData, null, 2);
   try {
     for (let i = 0; i < listas.length; i += 1) {
       // eslint-disable-next-line no-await-in-loop
@@ -286,6 +305,7 @@ exports.generator = async function (name, address, bafinKeywords) {
     response.financials = financials.getFinancials(universalCompanyData);
     console.log(`---Found ${response.financials.length} Financial objects`);
     infoContainer += `\n---Found ${response.financials.length} Financial objects\n`;
+    infoContainer += JSON.stringify(response.financials, null, 2);
   } catch (e) {
     console.log(e);
     infoContainer += e;
@@ -295,6 +315,7 @@ exports.generator = async function (name, address, bafinKeywords) {
 
   try {
     response.company_duration = financials.calculateYears(universalCompanyData);
+    infoContainer += JSON.stringify(response.company_duration, null, 2);
   } catch (e) {
     console.log(e);
     infoContainer += e;
@@ -304,6 +325,7 @@ exports.generator = async function (name, address, bafinKeywords) {
 
   try {
     response.capital = financials.get_stocks_capital(universalCompanyData);
+    infoContainer += JSON.stringify(response.capital, null, 2);
   } catch (e) {
     console.log(e);
     infoContainer += e;
@@ -313,6 +335,7 @@ exports.generator = async function (name, address, bafinKeywords) {
 
   try {
     response.contacts = financials.get_contacts(universalCompanyData);
+    infoContainer += JSON.stringify(response.contacts, null, 2);
   } catch (e) {
     console.log(e);
     infoContainer += e;
@@ -323,6 +346,7 @@ exports.generator = async function (name, address, bafinKeywords) {
   try {
     response.company_founding_date =
       financials.getFoundingDate(universalCompanyData);
+    infoContainer += JSON.stringify(response.company_founding_date, null, 2);
   } catch (e) {
     console.log(e);
     infoContainer += e;
@@ -333,6 +357,7 @@ exports.generator = async function (name, address, bafinKeywords) {
     "\nStep 1.10: Assigning last financial earnings to response\n";
 
   response.earnings = financials.lastFinancialEarnings(universalCompanyData);
+  infoContainer += JSON.stringify(response.earnings, null, 2);
 
   console.log("Step 1.11: Checking if last financial earnings are empty");
   infoContainer +=
@@ -362,6 +387,8 @@ exports.generator = async function (name, address, bafinKeywords) {
     response.financials = financialsReworked;
     console.log(`---Removed ${diff} duplicates from financial report`);
     infoContainer += `\n---Removed ${diff} duplicates from financial report\n`;
+    infoContainer += "\n---new financials\n";
+    infoContainer += JSON.stringify(response.financials, null, 2);
   }
 
   console.log("Step 1.13: Aquiring Google page rank");
@@ -371,6 +398,7 @@ exports.generator = async function (name, address, bafinKeywords) {
     response.pagerank_googlepresence = await pagerank.getAvarageDomainRanking(
       universalCompanyData
     );
+    infoContainer += JSON.stringify(response.pagerank_googlepresence, null, 2);
   } catch (e) {
     console.log(e);
     infoContainer += e;
@@ -382,6 +410,7 @@ exports.generator = async function (name, address, bafinKeywords) {
     response.trademarks = await financials.getTechTrademarks(
       universalCompanyData
     );
+    infoContainer += JSON.stringify(response.trademarks, null, 2);
   } catch (e) {
     console.log(e);
     infoContainer += e;
@@ -393,6 +422,11 @@ exports.generator = async function (name, address, bafinKeywords) {
   try {
     response.points.points_financials_publications =
       await points.findFinancialsPublictionsPoints(universalCompanyData);
+    infoContainer += JSON.stringify(
+      response.points.points_financials_publications,
+      null,
+      2
+    );
   } catch (e) {
     console.log(e);
     infoContainer += e;
@@ -403,6 +437,11 @@ exports.generator = async function (name, address, bafinKeywords) {
   try {
     response.points.points_financials_trademarks =
       await points.findFinancialsTrademarksPoints(universalCompanyData);
+    infoContainer += JSON.stringify(
+      response.points.points_financials_trademarks,
+      null,
+      2
+    );
   } catch (e) {
     console.log(e);
     infoContainer += e;
@@ -414,6 +453,7 @@ exports.generator = async function (name, address, bafinKeywords) {
     response.points.points_financials = await points.findFinancialsPoints(
       universalCompanyData
     );
+    infoContainer += JSON.stringify(response.points.points_financials, null, 2);
   } catch (e) {
     console.log(e);
     infoContainer += e;
@@ -425,6 +465,7 @@ exports.generator = async function (name, address, bafinKeywords) {
     response.points.points_trademarks = await points.getMktgIndictorsPoints(
       universalCompanyData
     );
+    infoContainer += JSON.stringify(response.points.points_trademarks, null, 2);
   } catch (e) {
     console.log(e);
     infoContainer += e;
@@ -469,6 +510,7 @@ exports.generator = async function (name, address, bafinKeywords) {
       result22,
       bafinKeywords
     );
+    infoContainer += JSON.stringify(isKeywordInBafinNews, null, 2);
   } catch (e) {
     console.log(e);
     infoContainer += e;
@@ -504,6 +546,7 @@ exports.generator = async function (name, address, bafinKeywords) {
   let scroreResult = {};
   try {
     scroreResult = await airtable.airtableCall8(response.points.sumOfPoints);
+    infoContainer += JSON.stringify(scroreResult, null, 2);
   } catch (e) {
     console.log(e);
     infoContainer += e;
@@ -575,9 +618,7 @@ exports.generator = async function (name, address, bafinKeywords) {
     console.log(e);
     infoContainer += e;
   }
-  fs.writeFile("./src/log/mainLog.txt", infoContainer, (err) => {
-    if (err) throw err;
-    console.log("File is created successfully.");
-  });
+  await writeToFile(infoContainer);
+
   return response;
 };
