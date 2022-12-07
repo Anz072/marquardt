@@ -23,6 +23,7 @@ const evaluation = require("./evaluation");
 const northData = require("./callContainer/northData");
 const bafin = require("./miscContainer/bafin");
 const airtable = require("./callContainer/airtable");
+const evaluationFunctions = require("./miscContainer/evaluationFunctions");
 
 function generateID() {
   return `553 ${`000${Math.random() * 1000}`.slice(-3)} ${`000${
@@ -55,7 +56,6 @@ exports.evaluate = async function (req, res) {
   responseData.setMarquardtProjectId(req.body.marquardtProjectId);
   responseData.setPaymentDetailsId(req.body.paymentDetails);
 
-  const requestData = req.body;
   const type = req.body.sharesSellerType;
   const {
     salesagentFirstName,
@@ -83,118 +83,48 @@ exports.evaluate = async function (req, res) {
     userBirthday: req.body.userBirthday,
   };
 
-  if (type === "person") {
-    const promises = [];
-    const eva = await evaluation.generator(name, address, [
-      `${salesagentFirstName} ${salesagentLastName}`,
-    ]);
-    promises.push(eva);
-    if (
-      salesagentFirstName !== undefined &&
-      salesagentLastName !== undefined &&
-      salesagentCity !== undefined &&
-      salesagentBirthday !== undefined
-    ) {
-      promises.push(
-        northData.getCEOsData(
-          salesagentFirstName,
-          salesagentLastName,
-          salesagentCity,
-          salesagentBirthday
-        )
-      );
-    }
-    const settledPromises = await Promise.allSettled(promises);
+  const ShareSellerTypes = {
+    COMPANY: "company",
+    PERSON: "person",
+    BYITSELF: "byitself",
+  };
 
-    if (settledPromises[0].status === "fulfilled") {
-      responseData.setCompanyData(settledPromises[0].value, type, appurl);
-      airtable.insertUserSearchRowToAirtable(
-        settledPromises[0].value,
-        null,
-        settledPromises[1].value,
-        type,
-        user
-      );
-    } else {
-      throw settledPromises[0].reason;
-    }
-    if (settledPromises[1].status === "fulfilled") {
-      await responseData.setSalesagentPersonData(settledPromises[1].value);
-    } else {
-      throw settledPromises[1].reason;
-    }
-  } else if (type === "company") {
-    const evaluationResultCompany = await evaluation.generator(
+  if (type === ShareSellerTypes.PERSON) {
+    await evaluationFunctions.shareSellerPERSON(
       name,
       address,
-      []
+      salesagentFirstName,
+      salesagentLastName,
+      salesagentCity,
+      salesagentBirthday,
+      responseData,
+      type,
+      user,
+      appurl
     );
-    const promises = [evaluationResultCompany];
-
-    if (
-      salesagentCompanyName !== undefined &&
-      salesagentCompanyCity !== undefined
-    ) {
-      promises.push(
-        evaluation.generator(salesagentCompanyName, salesagentCompanyCity, [])
-      );
-    }
-
-    const settledPromises = await Promise.allSettled(promises);
-
-    if (settledPromises[0].status === "fulfilled") {
-      responseData.setCompanyData(
-        settledPromises[0].value,
-        sharesSellerType,
-        appurl
-      );
-      airtable.insertUserSearchRowToAirtable(
-        settledPromises[0].value,
-        settledPromises[1].value,
-        null,
-        sharesSellerType,
-        user
-      );
-    } else {
-      throw settledPromises[0].reason;
-    }
-
-    if (settledPromises[1].status === "fulfilled") {
-      responseData.setSalesagentCompanyData(settledPromises[1].value);
-    } else {
-      throw settledPromises[1].reason;
-    }
-  } else if (type === "byitself") {
-    const evaluationResult = await evaluation.generator(name, address, []);
-    responseData.setCompanyData(evaluationResult, sharesSellerType, appurl);
-
-    if (
-      pointOfContact !== undefined &&
-      activeSearch !== undefined &&
-      investmentOffer !== undefined
-    ) {
-      const textfield_salesagency = await airtable.airtableTextfieldsSalegency(
-        investmentOffer,
-        pointOfContact,
-        activeSearch
-      );
-
-      if (textfield_salesagency?.records !== undefined) {
-        const text = textfield_salesagency?.records[0]?.fields?.text ?? "null";
-        responseData.setSalesagentByitselfData(
-          text,
-          responseData.data.company.warnungenBafin
-        );
-
-        airtable.insertUserSearchRowToAirtable(
-          evaluationResult,
-          null,
-          null,
-          sharesSellerType,
-          user
-        );
-      }
-    }
+  } else if (type === ShareSellerTypes.COMPANY) {
+    await evaluationFunctions.shareSellerCOMPANY(
+      name,
+      address,
+      salesagentCompanyName,
+      salesagentCompanyCity,
+      responseData,
+      sharesSellerType,
+      appurl,
+      user
+    );
+  } else if (type === ShareSellerTypes.BYITSELF) {
+    await evaluationFunctions.shareSellerBYITSELF(
+      name,
+      address,
+      sharesSellerType,
+      appurl,
+      pointOfContact,
+      activeSearch,
+      investmentOffer,
+      user,
+      responseData
+    );
   }
 
   responseData.setAnalysisID(

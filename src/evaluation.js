@@ -55,6 +55,7 @@ exports.generator = async function (name, address, bafinKeywords) {
   let companyData = {};
   try {
     companyData = await northData.getCompany(name, address);
+
     response.companyData = companyData;
   } catch (e) {
     console.log(e);
@@ -100,7 +101,7 @@ exports.generator = async function (name, address, bafinKeywords) {
   console.log("Step 1.3.2: Airtable call legalform points");
   infoContainer += "\nStep 1.3.2: Airtable call legalform points\n";
 
-  if (companyData.name?.legalForm !== undefined) {
+  if (companyData?.name?.legalForm !== undefined) {
     try {
       airtable2 = airtable.airtableCall_2(companyData.name.legalForm);
       promisesGeneralSheet.push(airtable2);
@@ -117,7 +118,7 @@ exports.generator = async function (name, address, bafinKeywords) {
   if (
     // eslint-disable-next-line operator-linebreak
     companyData.capital?.items[0]?.value !== undefined &&
-    companyData.name?.legalForm !== undefined
+    companyData?.name?.legalForm !== undefined
   ) {
     try {
       airtable3 = airtable.airtableCall_3(

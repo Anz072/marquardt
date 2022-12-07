@@ -3,6 +3,7 @@
 /* eslint-disable no-param-reassign */
 const { v4: uuidv4 } = require("uuid");
 const fs = require("fs");
+const { send } = require("process");
 
 const { downloadPDFs2 } = require("../callContainer/pdfMonkey");
 const { generatePdf } = require("../callContainer/pdfMonkey");
@@ -20,7 +21,7 @@ exports.grandGenerator = async function (responseData, sharesSellerType) {
       process.env.PDF_MONKEY_COMPANY
     );
     pdfUrlHolder.push(pdfUrl1);
-    if (responseData.data.company.ceos.length < 400) {
+    if (responseData.data.company.ceos.length > 400) {
       console.log("--- More than 400 ceo files");
       const responseCopy = JSON.parse(JSON.stringify(responseData.data));
       const xx = responseCopy.company.ceos.splice(0, 4);
@@ -39,11 +40,7 @@ exports.grandGenerator = async function (responseData, sharesSellerType) {
         if (a === 100) {
           sendDataMain.push(sendData);
           sendData = [];
-          console.log(
-            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-          );
-          console.log(a);
-          a = 1;
+          a = 0;
         }
         if (i === responseCopy25.company.ceos.length - 1) {
           sendDataMain.push(sendData);
