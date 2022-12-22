@@ -48,19 +48,44 @@ exports.grandGenerator = async function (responseData, sharesSellerType) {
         a += 1;
       }
 
+      let ceosStartAt = 0;
       for (let j = 0; j < sendDataMain.length; j += 1) {
         const responseCopy1 = JSON.parse(JSON.stringify(responseData.data));
+
         if (j === 0) {
           sendDataMain[j].splice(0, 4);
+          ceosStartAt = 0;
+          responseCopy1.company.previous_ceos_count = ceosStartAt;
+          responseCopy1.company.ceos = sendDataMain[j];
+        } else {
+          responseCopy1.company.ceos = sendDataMain[j];
+          ceosStartAt += sendDataMain[j - 1].length;
+          responseCopy1.company.previous_ceos_count = ceosStartAt;
         }
-        responseCopy1.company.ceos = sendDataMain[j];
 
-        responseCopy1.company.related_ceos_count =
-          responseCopy1.company.ceos.length;
+        // responseCopy1.company.related_ceos_count =
+        //   responseCopy1.company.ceos.length;
+        console.log("start at");
+        console.log(ceosStartAt);
+
+        console.log(responseCopy1.previous_ceos_count);
+        console.log(responseCopy1.company.related_ceos_count);
+        if (j === 1) {
+          fs.writeFile(
+            "./newLog.txt",
+            JSON.stringify(responseCopy1, null, 2),
+            (err) => {
+              if (err) {
+                console.error(err);
+              }
+            }
+          );
+        }
         const pdfUrl = await generatePdf(
           responseCopy1,
           process.env.PDF_CEO_BIG_PAGE
         );
+
         pdfUrlHolder.push(pdfUrl);
       }
     } else {
