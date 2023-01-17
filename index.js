@@ -16,6 +16,10 @@ router.post("/udateDossier", dossierCreator.evaluate);
 app.use(express.json());
 app.use("/", router);
 
+// app.get("/test", (req, res) => {
+//   res.sendFile("bullshite.pdf", { root: "src/mainPdfs/" });
+// });
+
 app.listen(port, () => {
   console.log(`Marquardt app listening on port ${port}`);
 });

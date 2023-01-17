@@ -81,15 +81,8 @@ exports.generator = async function (name, address, bafinKeywords) {
 
   let companyUniversal = {};
   try {
-    let companyRegisterCity = companyData?.register?.city;
-    let companyRegisterID = companyData?.register?.id;
-    if (companyRegisterCity === undefined) {
-      companyRegisterCity = "Heilberscheid"; //companyData?.address?.city;
-      companyRegisterID = "391200OAPU4MV8JBXQ26"; //companyData?.id;
-    }
-    if (companyRegisterID === undefined) {
-      companyRegisterID = companyData?.id;
-    }
+    const companyRegisterCity = companyData?.register?.city;
+    const companyRegisterID = companyData?.register?.id;
 
     companyUniversal = await northData.northUniversal(
       companyRegisterCity,

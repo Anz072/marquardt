@@ -18,6 +18,7 @@ const { send } = require("process");
 
 const { Response } = require("./classContainer/responseClass");
 
+const { postToBubble, postFileToBubble } = require("./webhook");
 const { grandGenerator } = require("./pdfContainer/pdfGenerator");
 const { mergeFunction } = require("./pdfContainer/merger");
 
@@ -284,6 +285,7 @@ exports.evaluate = async function (req, res) {
     console.log("---SENDING FUCNTION DEACTIVATED");
 
     // postToBubble(responseData.data);
+    // postFileToBubble(responseData.data);
   } catch (e) {
     console.log(e);
     infoContainer += e;
