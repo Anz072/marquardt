@@ -108,7 +108,7 @@ exports.grandGenerator = async function (responseData, sharesSellerType) {
   const nameArray = [];
   try {
     for (let i = 0; i < pdfUrlHolder.length; i += 1) {
-      const namePDF = uuidv4() + "-code-" + i;
+      const namePDF = uuidv4();
       nameArray.push(namePDF);
       await downloadPDFs2(pdfUrlHolder[i], namePDF);
     }
