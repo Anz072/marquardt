@@ -216,15 +216,13 @@ exports.evaluate = async function (req, res) {
       "Step 1.27: Calculating verbaucher warnings in related companies & assigning \n";
 
     let points = 0;
-    if (responseData.data.company.bafinpoints !== 0) {
+    if (responseData.data.company.bafinCount === 0) {
       console.log("---Bafin points -0");
       infoContainer += "---Bafin points -0 \n";
-
       points = 0;
     } else {
       console.log("---Bafin points -1000");
       infoContainer += "---Bafin points -1000 \n";
-
       points = -1000;
     }
     const newPoints = responseData.data.company.points_total + points;

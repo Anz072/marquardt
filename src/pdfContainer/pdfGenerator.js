@@ -21,15 +21,19 @@ exports.grandGenerator = async function (responseData, sharesSellerType) {
       process.env.PDF_MONKEY_COMPANY
     );
     pdfUrlHolder.push(pdfUrl1);
-    if (responseData.data.company.ceos.length > 400) {
+    if (responseData.data.company.ceos.length < 400) {
       console.log("--- More than 400 ceo files");
       const responseCopy = JSON.parse(JSON.stringify(responseData.data));
       const xx = responseCopy.company.ceos.splice(0, 4);
       responseCopy.company.ceos = xx;
 
-      pdfUrl2 = await generatePdf(responseCopy, process.env.PDF_CEO_FIRST_PAGE);
-      pdfUrlHolder.push(pdfUrl2);
-
+      if (responseCopy.company.ceos.length !== 0) {
+        pdfUrl2 = await generatePdf(
+          responseCopy,
+          process.env.PDF_CEO_FIRST_PAGE
+        );
+        pdfUrlHolder.push(pdfUrl2);
+      }
       const responseCopy25 = JSON.parse(JSON.stringify(responseData.data));
       const sendDataMain = [];
       let sendData = [];
@@ -63,13 +67,6 @@ exports.grandGenerator = async function (responseData, sharesSellerType) {
           responseCopy1.company.previous_ceos_count = ceosStartAt;
         }
 
-        // responseCopy1.company.related_ceos_count =
-        //   responseCopy1.company.ceos.length;
-        console.log("start at");
-        console.log(ceosStartAt);
-
-        console.log(responseCopy1.previous_ceos_count);
-        console.log(responseCopy1.company.related_ceos_count);
         if (j === 1) {
           fs.writeFile(
             "./newLog.txt",
@@ -81,12 +78,13 @@ exports.grandGenerator = async function (responseData, sharesSellerType) {
             }
           );
         }
-        const pdfUrl = await generatePdf(
-          responseCopy1,
-          process.env.PDF_CEO_BIG_PAGE
-        );
-
-        pdfUrlHolder.push(pdfUrl);
+        if (responseCopy1.company.ceos.length !== 0) {
+          const pdfUrl = await generatePdf(
+            responseCopy1,
+            process.env.PDF_CEO_BIG_PAGE
+          );
+          pdfUrlHolder.push(pdfUrl);
+        }
       }
     } else {
       console.log("LESS THAN 400 RELATED ITEMSs");
@@ -96,11 +94,7 @@ exports.grandGenerator = async function (responseData, sharesSellerType) {
       );
       pdfUrlHolder.push(pdfUrl2);
     }
-    if (
-      sharesSellerType === "byitself" ||
-      sharesSellerType === "company" ||
-      sharesSellerType === "person"
-    ) {
+    if (sharesSellerType === "company" || sharesSellerType === "person") {
       console.log("---Extra analysis will be added");
       pdfUrl3 = await generatePdf(
         responseData.data,
@@ -114,7 +108,7 @@ exports.grandGenerator = async function (responseData, sharesSellerType) {
   const nameArray = [];
   try {
     for (let i = 0; i < pdfUrlHolder.length; i += 1) {
-      const namePDF = uuidv4();
+      const namePDF = uuidv4() + "-code-" + i;
       nameArray.push(namePDF);
       await downloadPDFs2(pdfUrlHolder[i], namePDF);
     }

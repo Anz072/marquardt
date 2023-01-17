@@ -81,9 +81,19 @@ exports.generator = async function (name, address, bafinKeywords) {
 
   let companyUniversal = {};
   try {
+    let companyRegisterCity = companyData?.register?.city;
+    let companyRegisterID = companyData?.register?.id;
+    if (companyRegisterCity === undefined) {
+      companyRegisterCity = "Heilberscheid"; //companyData?.address?.city;
+      companyRegisterID = "391200OAPU4MV8JBXQ26"; //companyData?.id;
+    }
+    if (companyRegisterID === undefined) {
+      companyRegisterID = companyData?.id;
+    }
+
     companyUniversal = await northData.northUniversal(
-      companyData.register.city,
-      companyData.register.id
+      companyRegisterCity,
+      companyRegisterID
     );
     response.companyData = companyUniversal?.results[0]?.company;
   } catch (e) {
@@ -168,10 +178,24 @@ exports.generator = async function (name, address, bafinKeywords) {
   const listas2 = [];
   listas.push(companyData);
   let executionCounter = 0;
-  const universalCompanyData = companyUniversal?.results[0]?.company;
+  let universalCompanyData = companyUniversal?.results[0]?.company;
+
+  if (universalCompanyData === undefined) {
+    if (companyUniversal.results.length > 1) {
+      for (let i = 0; i < companyUniversal.results.length; i += 1) {
+        const keys = Object.keys(companyUniversal?.results[i]);
+        if (keys[0] === "company") {
+          universalCompanyData = companyUniversal?.results[i]?.company;
+          break;
+        }
+      }
+    }
+  }
+
   infoContainer += "\nUniversal company data\n";
   infoContainer += JSON.stringify(universalCompanyData, null, 2);
   try {
+    // if (universalCompanyData !== undefined) {
     for (let i = 0; i < listas.length; i += 1) {
       // eslint-disable-next-line no-await-in-loop
       const northUniversalResult = await northData.northUniversal(
@@ -293,6 +317,11 @@ exports.generator = async function (name, address, bafinKeywords) {
         }
       }
     }
+    // } else {
+    //   console.log("-----------Universal Data is undefined");
+    //   console.log("-----------Skipping search for ceos!");
+    //   infoContainer += "\n-----------Skipping search for ceos!\n";
+    // }
   } catch (e) {
     console.log(e);
     infoContainer += e;
@@ -565,54 +594,44 @@ exports.generator = async function (name, address, bafinKeywords) {
   try {
     response.ceos = await northData.getCeos(universalCompanyData);
 
-    for (let i = 0; i < response.ceos.length; i += 1) {
-      if (response.ceos[i].city === undefined) {
-        response.ceos[i].city = "undefined";
+    if (response.ceos.length !== 0) {
+      for (let i = 0; i < response.ceos.length; i += 1) {
+        if (response.ceos[i].city === undefined) {
+          response.ceos[i].city = "undefined";
+        }
+        if (response.ceos[i].liquidated == null) {
+          response.ceos[i].liquidated = "null";
+        }
+        if (response.ceos[i].other_compnies_count == null) {
+          response.ceos[i].other_compnies_count = "null";
+        }
       }
-      if (response.ceos[i].liquidated == null) {
-        response.ceos[i].liquidated = "null";
-      }
-      if (response.ceos[i].other_compnies_count == null) {
-        response.ceos[i].other_compnies_count = "null";
-      }
-    }
 
-    if (response.ceos !== []) {
-      response.associated_companies_count = response.ceos?.reduce(
-        (currentCount, currentCeo) => {
-          if (
-            currentCeo.other_compnies_count !== "null" &&
-            currentCeo.other_compnies_count !== null &&
-            currentCeo.other_compnies_count !== undefined
-          ) {
-            return currentCount + currentCeo.other_compnies_count;
-          }
-          return currentCount + 0;
-        },
-        0
-      );
-    }
-    if (response.ceos !== []) {
-      response.liquidated_companies_count = response.ceos?.reduce(
-        (currentCount, currentCeo) => {
-          if (
-            currentCeo.liquidated_companies_count !== "null" &&
-            currentCeo.liquidated_companies_count !== null &&
-            currentCeo.liquidated_companies_count !== undefined
-          ) {
-            return currentCount + currentCeo.liquidated_companies_count;
-          }
-          return currentCount + 0;
-        },
-        0
-      );
-    }
-
-    if (response.ceos.length > 0) {
-      if (response.ceos[0].active === true) {
-        // eslint-disable-next-line prefer-destructuring
-        response.current_ceo = response.ceos[0];
+      if (response.ceos !== []) {
+        response.liquidated_companies_count = response.ceos?.reduce(
+          (currentCount, currentCeo) => {
+            if (
+              currentCeo.liquidated_companies_count !== "null" &&
+              currentCeo.liquidated_companies_count !== null &&
+              currentCeo.liquidated_companies_count !== undefined
+            ) {
+              return currentCount + currentCeo.liquidated_companies_count;
+            }
+            return currentCount + 0;
+          },
+          0
+        );
       }
+
+      if (response.ceos.length > 0) {
+        if (response.ceos[0].active === true) {
+          // eslint-disable-next-line prefer-destructuring
+          response.current_ceo = response.ceos[0];
+        }
+      }
+    } else {
+      console.log("----------No related ceos exist, skipping search");
+      infoContainer += "\n---------No related ceos exist, skipping search";
     }
   } catch (e) {
     console.log(e);
