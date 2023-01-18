@@ -178,12 +178,7 @@ exports.sendError = function (data, e) {
   });
 };
 
-exports.postFileToBubble = async function (data) {
-  let urln = "x";
-  urln =
-    "https://paper-pusher.bubbleapps.io/version-test/api/1.1/wf/filereceivetest/initialize";
-  console.log(`Dossier file sending to bubble via webhook: ${urln}`);
-
+exports.postToGoogle = async function () {
   // const form = new formData();
   // form.append("file1", fs.createReadStream("./stickers.jpg")); // give absolute path if possible
 
@@ -201,37 +196,57 @@ exports.postFileToBubble = async function (data) {
   //   .catch((err) => console.error(err));
 
   //authorization
-  const auth = 0; //removed for privacy
-  // });
+  const auth = new google.auth.GoogleAuth({
+    credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS),
+    scopes: ["https://www.googleapis.com/auth/drive"],
+  });
 
   const client = await auth.getClient();
   const drive = google.drive({ version: "v3", auth: client });
-
-  const fileMetadata = {
-    name: "file.pdf",
-  };
+  let fileId = 0; // generated file id
   const media = {
     mimeType: "application/pdf",
     body: fs.createReadStream("bullshite.pdf"),
   };
   const resourcesa = {
     name: "newTitle2",
-    parents: ["1kVJl5agOs0UrfQ-QCGG2ZNG6uOY3ACIc"], //folder to upload to on Shared Drive
+    parents: ["1kVJl5agOs0UrfQ-QCGG2ZNG6uOY3ACIc"], // folder to upload to on Shared Drive
   };
-  drive.files.create(
-    {
-      resource: fileMetadata,
-      media: media,
-      fields: "id",
-      resource: resourcesa,
-    },
-    (err, file) => {
-      if (err) {
-        // Handle error
-        console.error(err);
-      } else {
-        console.log("File ID: ", file.data.id);
+  return new Promise((resolve, reject) => {
+    drive.files.create(
+      {
+        media: media,
+        fields: "id",
+        resource: resourcesa,
+      },
+      (err, file) => {
+        if (err) {
+          // Handle error
+          reject(err);
+        } else {
+          fileId = file.data.id;
+          // Make the file publicly available
+          drive.permissions.create(
+            {
+              fileId: file.data.id,
+              resource: {
+                type: "anyone",
+                role: "reader",
+              },
+            },
+            (err) => {
+              if (err) {
+                reject(err);
+              } else {
+                console.log("File made publicly available");
+                resolve(fileId);
+              }
+            }
+          );
+        }
       }
-    }
-  );
+    );
+  }).then((fileId) => {
+    return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${process.env.GOOGLE_API_KEY}`;
+  });
 };

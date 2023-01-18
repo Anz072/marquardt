@@ -18,7 +18,7 @@ const { send } = require("process");
 
 const { Response } = require("./classContainer/responseClass");
 
-const { postToBubble, postFileToBubble } = require("./webhook");
+const { postToBubble, postToGoogle } = require("./webhook");
 const { grandGenerator } = require("./pdfContainer/pdfGenerator");
 const { mergeFunction } = require("./pdfContainer/merger");
 
@@ -269,7 +269,7 @@ exports.evaluate = async function (req, res) {
 
   const file_buffer = fs.readFileSync(`./src/mainPdfs/${mergedName}.pdf`);
   const contents_in_base64 = file_buffer.toString("base64");
-  responseData.setGenertedPdf(contents_in_base64);
+  // responseData.setGenertedPdf(contents_in_base64);
 
   try {
     console.log("Step 1.29: Dossier is being sent to bubble");
@@ -284,8 +284,10 @@ exports.evaluate = async function (req, res) {
 
     console.log("---SENDING FUCNTION DEACTIVATED");
 
+    const googleUrl = await postToGoogle();
+    responseData.data.generatedPdf = googleUrl;
+
     // postToBubble(responseData.data);
-    // postFileToBubble(responseData.data);
   } catch (e) {
     console.log(e);
     infoContainer += e;
