@@ -135,7 +135,7 @@ exports.generator = async function (name, address, bafinKeywords) {
 
   if (
     // eslint-disable-next-line operator-linebreak
-    companyData.capital?.items[0]?.value !== undefined &&
+    companyData?.capital?.items[0]?.value !== undefined &&
     companyData?.name?.legalForm !== undefined
   ) {
     try {
@@ -170,6 +170,7 @@ exports.generator = async function (name, address, bafinKeywords) {
   const listas = [];
   const listas2 = [];
   listas.push(companyData);
+
   let executionCounter = 0;
   let universalCompanyData = companyUniversal?.results[0]?.company;
 
@@ -195,7 +196,8 @@ exports.generator = async function (name, address, bafinKeywords) {
         listas[i].register.city,
         listas[i].register.id
       );
-
+      // console.log("northUniversalResult" + i);
+      // console.log(northUniversalResult);
       if (
         northUniversalResult?.results[0]?.company?.relatedCompanies?.items
           .length > 0
@@ -625,6 +627,41 @@ exports.generator = async function (name, address, bafinKeywords) {
     } else {
       console.log("----------No related ceos exist, skipping search");
       infoContainer += "\n---------No related ceos exist, skipping search";
+    }
+  } catch (e) {
+    console.log(e);
+    infoContainer += e;
+  }
+  try {
+    if (response.ceos !== []) {
+      response.associated_companies_count = response.ceos?.reduce(
+        (currentCount, currentCeo) => {
+          if (
+            currentCeo.other_compnies_count !== "null" &&
+            currentCeo.other_compnies_count !== null &&
+            currentCeo.other_compnies_count !== undefined
+          ) {
+            return currentCount + currentCeo.other_compnies_count;
+          }
+          return currentCount + 0;
+        },
+        0
+      );
+    }
+    if (response.ceos !== []) {
+      response.liquidated_companies_count = response.ceos?.reduce(
+        (currentCount, currentCeo) => {
+          if (
+            currentCeo.liquidated_companies_count !== "null" &&
+            currentCeo.liquidated_companies_count !== null &&
+            currentCeo.liquidated_companies_count !== undefined
+          ) {
+            return currentCount + currentCeo.liquidated_companies_count;
+          }
+          return currentCount + 0;
+        },
+        0
+      );
     }
   } catch (e) {
     console.log(e);

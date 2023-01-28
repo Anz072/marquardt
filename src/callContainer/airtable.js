@@ -124,36 +124,36 @@ exports.airtableCall8 = function (
   return fetchAirTable(url);
 };
 
-exports.airtableCallDocuments_basicSheet = function (exists) {
-  const value = exists ? "yes" : "no";
-  const url = `https://api.airtable.com/v0/appctpGHdSxhxGaQ8/Algorithm?filterByFormula=AND(%0A%7Bset%7D+%3D+%22documents%22%2C%0A%7BKey%7D+%3D+%22basic+sheet%22%2C%0A%7Bvalue%7D+%3D+%22${encodeURIComponent(
-    value
-  )}%22)`;
-  return fetchAirTable(url);
-};
+// exports.airtableCallDocuments_basicSheet = function (exists) {
+//   const value = exists ? "yes" : "no";
+//   const url = `https://api.airtable.com/v0/appctpGHdSxhxGaQ8/Algorithm?filterByFormula=AND(%0A%7Bset%7D+%3D+%22documents%22%2C%0A%7BKey%7D+%3D+%22basic+sheet%22%2C%0A%7Bvalue%7D+%3D+%22${encodeURIComponent(
+//     value
+//   )}%22)`;
+//   return fetchAirTable(url);
+// };
 
-exports.airtableCallDocuments_shareholderlist = function (exists) {
-  const value = exists ? "yes" : "no";
-  const url = `https://api.airtable.com/v0/appctpGHdSxhxGaQ8/Algorithm?filterByFormula=AND(%0A%7Bset%7D+%3D+%22documents%22%2C%0A%7BKey%7D+%3D+%22shareholderlist%22%2C%0A%7Bvalue%7D+%3D+%22${encodeURIComponent(
-    value
-  )}%22)`;
-  return fetchAirTable(url);
-};
+// exports.airtableCallDocuments_shareholderlist = function (exists) {
+//   const value = exists ? "yes" : "no";
+//   const url = `https://api.airtable.com/v0/appctpGHdSxhxGaQ8/Algorithm?filterByFormula=AND(%0A%7Bset%7D+%3D+%22documents%22%2C%0A%7BKey%7D+%3D+%22shareholderlist%22%2C%0A%7Bvalue%7D+%3D+%22${encodeURIComponent(
+//     value
+//   )}%22)`;
+//   return fetchAirTable(url);
+// };
 
-exports.airtableCallDocuments_statute = function (exists) {
-  const value = exists ? "yes" : "no";
-  const url = `https://api.airtable.com/v0/appctpGHdSxhxGaQ8/Algorithm?filterByFormula=AND(%0A%7Bset%7D+%3D+%22documents%22%2C%0A%7BKey%7D+%3D+%22statutes%22%2C%0A%7Bvalue%7D+%3D+%22${encodeURIComponent(
-    value
-  )}%22)`;
-  return fetchAirTable(url);
-};
+// exports.airtableCallDocuments_statute = function (exists) {
+//   const value = exists ? "yes" : "no";
+//   const url = `https://api.airtable.com/v0/appctpGHdSxhxGaQ8/Algorithm?filterByFormula=AND(%0A%7Bset%7D+%3D+%22documents%22%2C%0A%7BKey%7D+%3D+%22statutes%22%2C%0A%7Bvalue%7D+%3D+%22${encodeURIComponent(
+//     value
+//   )}%22)`;
+//   return fetchAirTable(url);
+// };
 
-exports.airtableCallfinancialsCount = function (count) {
-  const url = `https://api.airtable.com/v0/appctpGHdSxhxGaQ8/Algorithm?filterByFormula=AND(%7Bset%7D%3D%22financials%22%2C%7Bkey%7D%3D%22Publications_count%22%2C%7Bvalue_integer_low%7D%3C%3D%7B${encodeURIComponent(
-    count
-  )}%7D%2C%7Bvalue_integer_high%7D%3E%3D%7B${encodeURIComponent(count)}%7D)`;
-  return fetchAirTable(url);
-};
+// exports.airtableCallfinancialsCount = function (count) {
+//   const url = `https://api.airtable.com/v0/appctpGHdSxhxGaQ8/Algorithm?filterByFormula=AND(%7Bset%7D%3D%22financials%22%2C%7Bkey%7D%3D%22Publications_count%22%2C%7Bvalue_integer_low%7D%3C%3D%7B${encodeURIComponent(
+//     count
+//   )}%7D%2C%7Bvalue_integer_high%7D%3E%3D%7B${encodeURIComponent(count)}%7D)`;
+//   return fetchAirTable(url);
+// };
 
 async function fetcher(url, init) {
   const zb = await fetch(url, init)

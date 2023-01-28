@@ -58,7 +58,7 @@ exports.shareSellerCOMPANY = async function (
   appurl,
   user
 ) {
-  const evaluationResultCompany = await evaluation.generator(name, address, []);
+  const evaluationResultCompany = evaluation.generator(name, address, []);
   const promises = [evaluationResultCompany];
 
   if (

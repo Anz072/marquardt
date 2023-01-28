@@ -274,6 +274,8 @@ exports.evaluate = async function (req, res) {
   try {
     console.log("Step 1.29: Dossier is being sent to bubble");
     infoContainer += "Step 1.29: Dossier is being sent to bubble \n";
+    console.log("responseData");
+    console.log(responseData.data);
 
     const responseCopyForLog = JSON.parse(JSON.stringify(responseData));
     responseCopyForLog.data.generatedPdf = "";
@@ -284,8 +286,8 @@ exports.evaluate = async function (req, res) {
 
     console.log("---SENDING FUCNTION DEACTIVATED");
 
-    const googleUrl = await postToGoogle();
-    responseData.data.generatedPdf = googleUrl;
+    // const googleUrl = await postToGoogle();
+    // responseData.data.generatedPdf = googleUrl;
 
     // postToBubble(responseData.data);
   } catch (e) {

@@ -157,15 +157,15 @@ exports.downloadPDFs2 = async function (fileURL, name) {
   });
 };
 
-exports.downloadPDFs3 = async function (fileURL, name) {
-  return new Promise((resolve) => {
-    const dl = new DownloaderHelper(fileURL, "./mainPdfs", {
-      override: true,
-      fileName: `${name}.pdf`,
-    });
-    dl.on("end", () => {
-      resolve();
-    });
-    dl.start();
-  });
-};
+// exports.downloadPDFs3 = async function (fileURL, name) {
+//   return new Promise((resolve) => {
+//     const dl = new DownloaderHelper(fileURL, "./mainPdfs", {
+//       override: true,
+//       fileName: `${name}.pdf`,
+//     });
+//     dl.on("end", () => {
+//       resolve();
+//     });
+//     dl.start();
+//   });
+// };

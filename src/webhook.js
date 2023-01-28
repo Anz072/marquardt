@@ -179,23 +179,6 @@ exports.sendError = function (data, e) {
 };
 
 exports.postToGoogle = async function () {
-  // const form = new formData();
-  // form.append("file1", fs.createReadStream("./stickers.jpg")); // give absolute path if possible
-
-  // var URL = "XYZ URL";
-
-  // fetch(urln, {
-  //   method: "POST",
-  //   body: form,
-  //   headers: {
-  //     ...form.getHeaders(),
-  //     Authorization: "Bearer " + process.env.BUBBLE_KEY,
-  //   },
-  // })
-  //   .then((res) => console.log(res))
-  //   .catch((err) => console.error(err));
-
-  //authorization
   const auth = new google.auth.GoogleAuth({
     credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS),
     scopes: ["https://www.googleapis.com/auth/drive"],
@@ -208,16 +191,16 @@ exports.postToGoogle = async function () {
     mimeType: "application/pdf",
     body: fs.createReadStream("bullshite.pdf"),
   };
-  const resourcesa = {
+  const resource = {
     name: "newTitle2",
-    parents: ["1kVJl5agOs0UrfQ-QCGG2ZNG6uOY3ACIc"], // folder to upload to on Shared Drive
+    parents: [process.env.GOOGLE_PARENT_FOLDER],
   };
   return new Promise((resolve, reject) => {
     drive.files.create(
       {
-        media: media,
+        media,
         fields: "id",
-        resource: resourcesa,
+        resource,
       },
       (err, file) => {
         if (err) {
@@ -246,7 +229,8 @@ exports.postToGoogle = async function () {
         }
       }
     );
-  }).then((fileId) => {
-    return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${process.env.GOOGLE_API_KEY}`;
-  });
+  }).then(
+    (fileId) =>
+      `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${process.env.GOOGLE_API_KEY}`
+  );
 };

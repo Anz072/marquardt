@@ -41,7 +41,7 @@ exports.getCompany = async function (name, address) {
   const url = `https://www.northdata.com/_api/company/v1/company?name=
   ${encodeURIComponent(name)}&address=${encodeURIComponent(address)}`;
   if (process.env.DEBUG === "true") {
-    console.log(`northdata company data - ${url}`);
+    // console.log(`northdata company data - ${url}`);
   }
   return fetchNorthdata(url);
 };

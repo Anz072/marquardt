@@ -10,9 +10,7 @@ exports.searchBaFinKeyword = async function () {
     const airtableResult =
       await airtable.airtableCallSearchKeywordsInBafinNews();
 
-    //-------------------------------------------
     console.log("Airtable data received");
-    //-------------------------------------------
     return airtableResult;
   } catch (e) {
     console.log(e);
@@ -214,7 +212,7 @@ exports.checkRealatedBafin = async function (relatedCompanieslist, result22) {
         (isKeywordInBafinNewsRelated.verbaucher === true ||
           isKeywordInBafinNewsRelated.bafin === true)
       ) {
-        console.log("bafinwasfoundgayversion:");
+        console.log("bafinwasfoundversion:");
       }
     }
   }
