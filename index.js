@@ -7,7 +7,7 @@ const router = express.Router();
 const dossierCreator = require("./src/dossierCreator");
 
 router.post("/createDossier", dossierCreator.evaluate);
-router.post("/udateDossier", dossierCreator.evaluate);
+router.post("/updateDossier", dossierCreator.evaluate);
 
 app.use(express.json()); // parse incoming json
 app.use("/", router);

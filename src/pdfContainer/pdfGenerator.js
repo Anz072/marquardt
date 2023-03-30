@@ -21,7 +21,8 @@ exports.grandGenerator = async function (responseData, sharesSellerType) {
       process.env.PDF_MONKEY_COMPANY
     );
     pdfUrlHolder.push(pdfUrl1);
-    if (responseData.data.company.ceos.length < 400) {
+    console.log(`--- CEO FILE COUNT: ${responseData.data.company.ceos.length}`);
+    if (responseData.data.company.ceos.length > 400) {
       console.log("--- More than 400 ceo files");
       const responseCopy = JSON.parse(JSON.stringify(responseData.data));
       const xx = responseCopy.company.ceos.splice(0, 4);
