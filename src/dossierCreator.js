@@ -47,6 +47,7 @@ async function writeToFile(infoContainer) {
 exports.evaluate = async function (req, res) {
   let dossierId = 0;
   const idCheck = req.body.generatedID;
+  const bubbleEnvironment = req.body.environment;
   let isNew = false;
   let infoContainer = "";
 
@@ -214,7 +215,7 @@ exports.evaluate = async function (req, res) {
       "Step 1.27: Calculating verbaucher warnings in related companies & assigning"
     );
     infoContainer +=
-      "Step 1.27: Calculating verbaucher warnings in related companies & assigning \n";
+      "Step 1.27: Calculating verbaucher  warnings in related companies & assigning \n";
 
     let points = 0;
     if (responseData.data.company.bafinCount === 0) {
@@ -267,15 +268,13 @@ exports.evaluate = async function (req, res) {
   console.log("---Dossier being converted to base64");
   infoContainer += "---Dossier being converted to base64 \n";
 
-  const file_buffer = fs.readFileSync(`./src/mainPdfs/${mergedName}.pdf`);
-  const contents_in_base64 = file_buffer.toString("base64");
+  // const file_buffer = fs.readFileSync(`./src/mainPdfs/${mergedName}.pdf`);
+  // const contents_in_base64 = file_buffer.toString("base64");
   // responseData.setGenertedPdf(contents_in_base64);
 
   try {
     console.log("Step 1.29: Dossier is being sent to bubble");
     infoContainer += "Step 1.29: Dossier is being sent to bubble \n";
-    console.log("responseData");
-    console.log(responseData.data);
 
     const responseCopyForLog = JSON.parse(JSON.stringify(responseData));
     responseCopyForLog.data.generatedPdf = "";
@@ -286,10 +285,11 @@ exports.evaluate = async function (req, res) {
 
     console.log("---SENDING FUCNTION DEACTIVATED");
 
-    // const googleUrl = await postToGoogle();
-    // responseData.data.generatedPdf = googleUrl;
-
-    // postToBubble(responseData.data);
+    const googleUrl = await postToGoogle(bubbleEnvironment, mergedName);
+    console.log("googleUrl");
+    console.log(googleUrl);
+    responseData.data.generatedPdfGoogle = googleUrl;
+    postToBubble(responseData.data);
   } catch (e) {
     console.log(e);
     infoContainer += e;

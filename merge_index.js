@@ -29,5 +29,5 @@ app.get("/", (req, res) => {
 
 app.listen(port, () => {
   // setUpDirs();
-  console.log(`Marquardt app listening on port ${port}`);
+  console.log(`Marquardt app merger listening on port ${port}`);
 });

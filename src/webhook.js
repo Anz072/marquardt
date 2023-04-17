@@ -11,7 +11,8 @@ const axios = require("axios");
 const fs = require("fs");
 const formData = require("form-data");
 const { google } = require("googleapis");
-const { GoogleAuth } = require("google-auth-library");
+// const { GoogleAuth } = require("google-auth-library");
+const { JWT } = require("google-auth-library");
 
 const fetch = (...args) =>
   import("node-fetch").then(({ default: fetch }) => fetch(...args));
@@ -19,7 +20,7 @@ const fetch = (...args) =>
 exports.postToBubble = function (data) {
   let url = "x";
   if (data.isNew === true) {
-    url = `${data.url}api/1.1/wf/marquardt-webhook`;
+    url = `${data.url}api/1.1/wf/marquardt-webhook_google`;
   } else {
     url = `${data.url}api/1.1/wf/marquardt-webhook-update`;
   }
@@ -178,59 +179,55 @@ exports.sendError = function (data, e) {
   });
 };
 
-exports.postToGoogle = async function () {
-  const auth = new google.auth.GoogleAuth({
-    credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS),
-    scopes: ["https://www.googleapis.com/auth/drive"],
-  });
-
-  const client = await auth.getClient();
-  const drive = google.drive({ version: "v3", auth: client });
-  let fileId = 0; // generated file id
-  const media = {
-    mimeType: "application/pdf",
-    body: fs.createReadStream("bullshite.pdf"),
-  };
-  const resource = {
-    name: "newTitle2",
-    parents: [process.env.GOOGLE_PARENT_FOLDER],
-  };
-  return new Promise((resolve, reject) => {
-    drive.files.create(
-      {
+exports.postToGoogle = async function (bubbleEnvironment, mergedName) {
+  // eslint-disable-next-line no-async-promise-executor
+  return new Promise(async (resolve, reject) => {
+    try {
+      let parentFolder = process.env.GOOGLE_LIVE_PARENT_FOLDER;
+      if (bubbleEnvironment === "test") {
+        parentFolder = process.env.GOOGLE_DEVELOPMENT_PARENT_FOLDER;
+      }
+      const privateKey = process.env.GOOGLE_SERVICE_PRIVATE_KEY;
+      const email = "paperpusher@solid-sun-357412.iam.gserviceaccount.com";
+      const SCOPES = ["https://www.googleapis.com/auth/drive"];
+      const authClient = new JWT({
+        email,
+        key: privateKey,
+        scopes: SCOPES,
+      });
+      await authClient.authorize();
+      const drive = google.drive({
+        version: "v3",
+        auth: authClient,
+      });
+      const fileMetadata = {
+        name: `${mergedName}.pdf`,
+        parents: [parentFolder],
+      };
+      const media = {
+        mimeType: "application/pdf",
+        body: fs.createReadStream(`src/mainPdfs/${mergedName}.pdf`),
+      };
+      const { data } = await drive.files.create({
+        resource: fileMetadata,
         media,
         fields: "id",
-        resource,
-      },
-      (err, file) => {
-        if (err) {
-          // Handle error
-          reject(err);
-        } else {
-          fileId = file.data.id;
-          // Make the file publicly available
-          drive.permissions.create(
-            {
-              fileId: file.data.id,
-              resource: {
-                type: "anyone",
-                role: "reader",
-              },
-            },
-            (err) => {
-              if (err) {
-                reject(err);
-              } else {
-                console.log("File made publicly available");
-                resolve(fileId);
-              }
-            }
-          );
-        }
-      }
-    );
-  }).then(
-    (fileId) =>
-      `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${process.env.GOOGLE_API_KEY}`
-  );
+      });
+      console.log("File ID:", data.id);
+      // Make the file publicly available
+      await drive.permissions.create({
+        fileId: data.id,
+        resource: {
+          type: "anyone",
+          role: "reader",
+        },
+      });
+      // resolve(data.id);
+      resolve(
+        `https://www.googleapis.com/drive/v3/files/${data.id}?alt=media&key=${process.env.GOOGLE_API_KEY}`
+      );
+    } catch (err) {
+      reject(err);
+    }
+  });
 };

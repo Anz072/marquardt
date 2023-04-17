@@ -1,3 +1,10 @@
+/* eslint-disable spaced-comment */
+/* eslint-disable operator-linebreak */
+/* eslint-disable comma-dangle */
+/* eslint-disable no-console */
+/* eslint-disable implicit-arrow-linebreak */
+/* eslint-disable no-unused-vars */
+/* eslint-disable consistent-return */
 /* eslint-disable func-names */
 /* eslint-disable no-shadow */
 /* eslint-disable no-undef */
@@ -7,12 +14,20 @@
 /* eslint-disable guard-for-in */
 
 const PDFMerger = require("pdf-merger-js");
+
 const { v4: uuidv4 } = require("uuid");
+
 const util = require("util");
-const http = require("http");
+
+const http = require("https");
+
 const { promisify } = util;
+
 const fs = require("fs");
+
 require("dotenv").config();
+
+const { postToGoogle } = require("./src/webhook");
 
 const fetch = (...args) =>
   import("node-fetch").then(({ default: fetch }) => fetch(...args));
@@ -21,7 +36,7 @@ function sendError(url, ID) {
   const url2 = `${url}api/1.1/wf/merger-error-handler`;
 
   const ans = {
-    ID: ID,
+    ID,
     merging: "no",
   };
 
@@ -39,8 +54,8 @@ function sendError(url, ID) {
   });
 }
 
-function postToBubble2(url, base64, ID) {
-  const url2 = `${url}api/1.1/wf/merger`;
+function postToBubble2(url, googleURL, ID) {
+  const url2 = `${url}api/1.1/wf/merger_google`;
   //----------------------------------------------------------
   console.log(`Step 1.8: Dossier sending to bubble via webhook: ${url2}`);
   //----------------------------------------------------------
@@ -49,17 +64,15 @@ function postToBubble2(url, base64, ID) {
 
   const ans = {
     ID,
-    file: {
-      filename: respnameMain,
-      contents: base64,
-    },
+    googleURL,
   };
-
+  console.log("ans");
+  console.log(url);
   const options = {
     method: "POST",
     body: JSON.stringify(ans),
     headers: {
-      // "Authorization": "Bearer " + process.env.BUBBLE_KEY,
+      Authorization: `Bearer ${process.env.BUBBLE_KEY}`,
       "Content-Type": "application/json",
     },
   };
@@ -68,78 +81,60 @@ function postToBubble2(url, base64, ID) {
   });
 }
 
-async function Merger(files, url, ID) {
+async function Merger(ID, bubbleEnvironment, files, url) {
   const merger = new PDFMerger();
   console.log("Step 1.5: Merging of downloaded files started");
-
   try {
-    await Promise.all(files.map((file) => merger.add(file)));
+    // Add the first file to the merger
+    await merger.add(files[0]);
+    console.log(`File ${files[0]} added to merger`);
+
+    // Add the rest of the files to the merger using Promise.all
+    await Promise.all(
+      files.slice(1).map(async (file) => {
+        try {
+          await merger.add(file);
+          console.log(`File ${file} added to merger`);
+        } catch (err) {
+          console.error(`Error adding file ${file}:`, err);
+        }
+      })
+    );
+
     console.log("--files added for merging");
+    // console.log(merger);
   } catch (e) {
     console.log(e);
   }
-
+  // console.log(merger);
   const mergedName = uuidv4();
   try {
-    await merger.save(`./pdf/${mergedName}.pdf`);
+    await merger.save(`./src/mainPdfs/${mergedName}.pdf`);
     console.log("Step 1.6: Documents have been merged successfully");
   } catch (e) {
     console.log(e);
   }
 
   try {
-    const fileBuffer = await fs.promises.readFile(`./pdf/${mergedName}.pdf`);
-    const contentsInBase64 = fileBuffer.toString("base64");
+    // const fileBuffer = await fs.promises.readFile(`./pdf/${mergedName}.pdf`);
+    // const contentsInBase64 = fileBuffer.toString("base64");
     console.log(
       "Step 1.7: Merged document have been converted into base64 & send to bubble"
     );
-    files = [];
-    // postToBubble2(url, contentsInBase64, ID);
+
+    const googleUrl = await postToGoogle(bubbleEnvironment, mergedName);
+    console.log("googleUrl");
+    console.log(googleUrl);
+    postToBubble2(url, googleUrl, ID);
     console.log("Step 1.9: Merging of documents ended\n");
   } catch (e) {
     console.log(e);
   }
 }
 
-// async function dowloadFiles(file_url, files, url, ID, str, arr, gen) {
-//   const fileName = uuidv4();
-//   let firstPartofPDF = false;
-
-//   if (file_url === gen) {
-//     firstPartofPDF = true;
-//   }
-
-//   const location = `pdf/${fileName}.pdf`;
-//   const file = fs.createWriteStream(location);
-//   // eslint-disable-next-line no-unused-vars
-//   const request = http.get(file_url, (response) => {
-//     response.pipe(file);
-
-//     file.on("finish", () => {
-//       file.close();
-//       filec += 1;
-//       if (firstPartofPDF === true) {
-//         files.unshift(fileName);
-//       } else {
-//         files.push(fileName);
-//       }
-
-//       if (filec === arr.length) {
-//         //----------------------------------------------------------
-//         console.log("Step 1.4: Documents downloaded");
-//         //----------------------------------------------------------
-//         filec = 0;
-//         Merger(files, url, ID, str);
-//       }
-//     });
-//   });
-// }
-
-// eslint-disable-next-line consistent-return
-
 promisify(http.request);
 
-async function downloadFiles(fileUrls, url, ID) {
+async function downloadFiles(ID, bubbleEnvironment, fileUrls, url) {
   const promises = fileUrls.map(async (fileUrl) => {
     const fileName = uuidv4();
     const location = `pdf/${fileName}.pdf`;
@@ -158,14 +153,14 @@ async function downloadFiles(fileUrls, url, ID) {
 
   const files = await Promise.all(promises);
   console.log("DOWNLOADED");
-  Merger(files, url, ID);
+  Merger(ID, bubbleEnvironment, files, url);
 }
 
 exports.merge = async function (req, res) {
   res.status(200).send("merging");
 
   console.log("Step 1: Merging of documents started");
-
+  const bubbleEnvironment = req.body.environment;
   const { url } = req.body;
   // eslint-disable-next-line no-unused-vars
   const merger = new PDFMerger();
@@ -174,16 +169,16 @@ exports.merge = async function (req, res) {
   const ID = req.body.id;
   const strc = req.body.files;
 
-  const gen = `http:${req.body.generatedPdf}`;
+  const gen = req.body.generatedPdf; //`http:${req.body.generatedPdf}`;
   arr.push(gen);
   const arr2 = strc.split(",");
   // check if files ends with pdf
   // eslint-disable-next-line no-restricted-syntax, no-undef
   for (item in arr2) {
     // eslint-disable-next-line no-undef
-    const extension = arr2[item].substr(arr2[item].lastIndexOf(".") + 1);
+    const extension = arr2[item].substr(arr2[item].lastIndexOf(".") + 1).trim();
     if (extension.toLowerCase() !== "pdf") {
-      console.log(extension);
+      // console.log(extension + "D");
       console.log("Incorrect file extension uploaded!");
       console.log("Stopping service & sending error to bubble");
       return sendError(url, ID);
@@ -192,7 +187,7 @@ exports.merge = async function (req, res) {
 
   let strcd;
   for (node in arr2) {
-    strcd = `http:${arr2[node].replace(/\s/g, "")}`;
+    strcd = `https:${arr2[node].replace(/\s/g, "")}`;
     arr.push(strcd);
   }
 
@@ -204,5 +199,5 @@ exports.merge = async function (req, res) {
   console.log(`Step 1.2: User project ID: ${ID}`);
   console.log("Step 1.3: Documents download to heroku started");
 
-  await downloadFiles(arr);
+  await downloadFiles(ID, bubbleEnvironment, arr, url);
 };
