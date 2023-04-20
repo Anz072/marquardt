@@ -50,6 +50,15 @@ exports.evaluate = async function (req, res) {
   const bubbleEnvironment = req.body.environment;
   let isNew = false;
   let infoContainer = "";
+  const filePath = "./src/log/mainLog.txt";
+
+  if (fs.existsSync(filePath)) {
+    console.log("File exists");
+  } else {
+    console.log("File does not exist");
+    // create the file
+    fs.writeFile(filePath, "Start");
+  }
 
   fs.writeFile("./src/log/mainLog.txt", "START OF LOGGING\n", (err) => {
     if (err) {
