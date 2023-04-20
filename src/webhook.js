@@ -22,7 +22,7 @@ exports.postToBubble = function (data) {
   if (data.isNew === true) {
     url = `${data.url}api/1.1/wf/marquardt-webhook_google`;
   } else {
-    url = `${data.url}api/1.1/wf/marquardt-webhook-update`;
+    url = `${data.url}api/1.1/wf/marquardt-webhook-update_google`;
   }
 
   if (Object.keys(data.salesagent_byitself).length !== 0) {
