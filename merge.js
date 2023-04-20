@@ -137,7 +137,7 @@ promisify(http.request);
 async function downloadFiles(ID, bubbleEnvironment, fileUrls, url) {
   const promises = fileUrls.map(async (fileUrl) => {
     const fileName = uuidv4();
-    const location = `pdf/${fileName}.pdf`;
+    const location = `./src/mainPdfs/${fileName}.pdf`;
     const file = fs.createWriteStream(location);
     const request = http.request(fileUrl, (response) => {
       response.pipe(file);
