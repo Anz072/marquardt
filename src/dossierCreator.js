@@ -59,7 +59,13 @@ exports.evaluate = async function (req, res) {
 
   const responseData = new Response();
 
-  if (idCheck === "" || idCheck === null || idCheck === "null") {
+  if (
+    idCheck === "" ||
+    idCheck === null ||
+    idCheck === "null" ||
+    idCheck === "undefined" ||
+    idCheck === undefined
+  ) {
     dossierId = generateID();
     isNew = true;
     console.log("---Dossier status: NEW");
