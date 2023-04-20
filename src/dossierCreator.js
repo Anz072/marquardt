@@ -114,7 +114,8 @@ exports.evaluate = async function (req, res) {
     PERSON: "person",
     BYITSELF: "byitself",
   };
-
+  console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa");
+  console.log(req.body);
   if (type === ShareSellerTypes.PERSON) {
     await evaluationFunctions.shareSellerPERSON(
       name,
