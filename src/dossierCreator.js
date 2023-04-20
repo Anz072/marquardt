@@ -288,7 +288,7 @@ exports.evaluate = async function (req, res) {
 
     await writeToFile(infoContainer, filePath);
 
-    console.log("---SENDING FUCNTION DEACTIVATED");
+    //console.log("---SENDING FUCNTION DEACTIVATED");
 
     const googleUrl = await postToGoogle(bubbleEnvironment, mergedName);
     console.log("googleUrl");
