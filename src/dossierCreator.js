@@ -50,7 +50,7 @@ exports.evaluate = async function (req, res) {
   const bubbleEnvironment = req.body.environment;
   let isNew = false;
   let infoContainer = "";
-  const filePath = "./src/log/mainLog.txt";
+  const filePath = "mainLog.txt";
 
   fs.writeFile(filePath, "START OF LOGGING\n", (err) => {
     if (err) throw err;
@@ -63,11 +63,13 @@ exports.evaluate = async function (req, res) {
     dossierId = generateID();
     isNew = true;
     console.log("---Dossier status: NEW");
+    console.log(idCheck);
     infoContainer += "---Dossier status: NEW \n";
   } else {
     dossierId = idCheck;
     isNew = false;
     console.log("---Dossier status: REFRESH");
+    console.log(idCheck);
     infoContainer += "---Dossier status: REFRESH \n";
   }
   res.status(200).send(dossierId);
