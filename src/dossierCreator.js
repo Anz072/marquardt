@@ -31,13 +31,9 @@ function generateID() {
     Math.random() * 1000
   }`.slice(-3)}`;
 }
-async function writeToFile(infoContainer) {
+async function writeToFile(infoContainer, filePath) {
   try {
-    await fsPromises.appendFile(
-      "./src/log/mainLog.txt",
-      infoContainer,
-      "utf-8"
-    );
+    await fsPromises.appendFile(filePath, infoContainer, "utf-8");
     console.log("WRITTEN TO FILE");
   } catch (err) {
     console.log("Error appending data to file", err);
@@ -290,7 +286,7 @@ exports.evaluate = async function (req, res) {
     infoContainer += "\nFinal data that will be sent to bubble:\n";
     infoContainer += JSON.stringify(responseCopyForLog, null, 2);
 
-    await writeToFile(infoContainer);
+    await writeToFile(infoContainer, filePath);
 
     console.log("---SENDING FUCNTION DEACTIVATED");
 

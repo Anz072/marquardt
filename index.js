@@ -21,6 +21,17 @@ app.use(cors());
 app.get("/", (req, res) => {
   res.status(200).end();
 });
+
+const mainPdfsPath = path.join(__dirname, "src", "mainPdfs");
+if (!fs.existsSync(mainPdfsPath)) {
+  fs.mkdir(mainPdfsPath, { recursive: true }, (err) => {
+    if (err) throw err;
+    console.log("mainPdfs folder created successfully!");
+  });
+} else {
+  console.log("mainPdfs folder already exists");
+}
+
 app.listen(port, () => {
   console.log(`Marquardt app listening on port ${port}`);
 });

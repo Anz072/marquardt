@@ -15,11 +15,7 @@ require("dotenv").config();
 
 async function writeToFile(infoContainer) {
   try {
-    await fsPromises.appendFile(
-      "./src/log/mainLog.txt",
-      infoContainer,
-      "utf-8"
-    );
+    await fsPromises.appendFile("mainLog.txt", infoContainer, "utf-8");
     console.log("WRITTEN TO FILE");
   } catch (err) {
     console.log("Error appending data to file", err);
