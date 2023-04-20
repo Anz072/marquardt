@@ -52,18 +52,9 @@ exports.evaluate = async function (req, res) {
   let infoContainer = "";
   const filePath = "./src/log/mainLog.txt";
 
-  if (fs.existsSync(filePath)) {
-    console.log("File exists");
-  } else {
-    console.log("File does not exist");
-    // create the file
-    fs.writeFile(filePath, "Start");
-  }
-
-  fs.writeFile("./src/log/mainLog.txt", "START OF LOGGING\n", (err) => {
-    if (err) {
-      console.error(err);
-    }
+  fs.writeFile(filePath, "START OF LOGGING\n", (err) => {
+    if (err) throw err;
+    console.log("File created");
   });
 
   const responseData = new Response();
