@@ -187,7 +187,7 @@ exports.postToGoogle = async function (bubbleEnvironment, mergedName) {
       if (bubbleEnvironment === "test") {
         parentFolder = process.env.GOOGLE_DEVELOPMENT_PARENT_FOLDER;
       }
-      const privateKey = process.env.GOOGLE_SERVICE_PRIVATE_KEY;
+      const privateKey = `-----BEGIN PRIVATE KEY-----\n${process.env.GOOGLE_SERVICE_PRIVATE_KEY}\n-----END PRIVATE KEY-----\n`;
       const email = "paperpusher@solid-sun-357412.iam.gserviceaccount.com";
       const SCOPES = ["https://www.googleapis.com/auth/drive"];
       const authClient = new JWT({
