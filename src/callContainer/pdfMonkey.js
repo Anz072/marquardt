@@ -104,9 +104,10 @@ exports.generatePdf = async function (data, templateID) {
     data.investmentOffer === "null" ||
     data.investmentOffer === undefined
   ) {
-    data.investmentOffer = "ja";
+    data.investmentOffer = true;
   }
-
+  console.log("INVESTMENTOFFER");
+  console.log(data.investmentOffer);
   const body = {
     document: {
       document_template_id: templateID,

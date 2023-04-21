@@ -110,8 +110,8 @@ exports.evaluate = async function (req, res) {
     PERSON: "person",
     BYITSELF: "byitself",
   };
-  console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa");
-  console.log(req.body);
+  // console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa");
+  // console.log(req.body);
   if (type === ShareSellerTypes.PERSON) {
     await evaluationFunctions.shareSellerPERSON(
       name,
@@ -288,7 +288,7 @@ exports.evaluate = async function (req, res) {
 
     await writeToFile(infoContainer, filePath);
 
-    //console.log("---SENDING FUCNTION DEACTIVATED");
+    //console.log("---SENDING FUCNTION DEACTIVATED")Vertriebsanalyse;
 
     const googleUrl = await postToGoogle(bubbleEnvironment, mergedName);
     console.log("googleUrl");

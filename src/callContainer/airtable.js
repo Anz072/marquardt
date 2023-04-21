@@ -13,6 +13,7 @@ const fetch = (...args) =>
 
 function CheckError(response) {
   if (response.status >= 200 && response.status <= 299) {
+    console.log(response.status);
     return response.json();
   }
   if (response.status === 404) {
@@ -166,6 +167,19 @@ async function fetcher(url, init) {
   return zb;
 }
 
+async function getAllDataFromTable(TABLE_NAME, API_KEY, BASE_ID) {
+  const url = `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(
+    TABLE_NAME
+  )}`;
+
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${API_KEY}` },
+  });
+
+  const data = await response.json();
+  return data;
+}
+
 exports.airtableCallSearchKeywordsInBafinNews = async function () {
   // eslint-disable-next-line operator-linebreak
   const url =
@@ -184,6 +198,7 @@ exports.airtableCallSearchKeywordsInBafinNews = async function () {
   };
 
   const zet = await fetcher(url, init);
+  // const zet = await getAllDataFromTable();
   for (let i = 0; i < zet.records.length; i += 1) {
     holder.push(zet.records[i]);
   }
@@ -254,6 +269,7 @@ exports.airtableCallSearchKeywordsInBafinNews = async function () {
 
 exports.airtableCallSearchKeywordsInBafinNews2 = async function () {
   // eslint-disable-next-line operator-linebreak
+
   const url =
     "https://api.airtable.com/v0/appctpGHdSxhxGaQ8/BaFin_Company_News";
 
@@ -264,12 +280,12 @@ exports.airtableCallSearchKeywordsInBafinNews2 = async function () {
     headers: {
       Authorization: `Bearer ${process.env.AIRTABLE_KEY}`,
     },
-    params: {
-      maxRecords: "2",
-    },
   };
 
   const zet = await fetcher(url, init);
+  // console.log("REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+  // console.log(zet);
+
   for (let i = 0; i < zet.records.length; i += 1) {
     holder.push(zet.records[i]);
   }
@@ -307,9 +323,9 @@ exports.airtableCallSearchKeywordsInBafinNews2 = async function () {
       }
     }
   }
-
   return { holder1, holder2 };
 };
+
 function round(value, precision = 0) {
   const exponent = 10 ** precision;
   return Math.round(value * exponent) / exponent;

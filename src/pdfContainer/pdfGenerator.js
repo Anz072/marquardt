@@ -95,7 +95,15 @@ exports.grandGenerator = async function (responseData, sharesSellerType) {
       );
       pdfUrlHolder.push(pdfUrl2);
     }
-    if (sharesSellerType === "company" || sharesSellerType === "person") {
+    console.log("responseData.data.investmentOffer");
+    console.log(responseData.data.investmentOffer);
+    if (
+      sharesSellerType === "company" ||
+      sharesSellerType === "person" ||
+      (sharesSellerType === "byitself" &&
+        (responseData.data.investmentOffer === "true" ||
+          responseData.data.investmentOffer === "ja"))
+    ) {
       console.log("---Extra analysis will be added");
       pdfUrl3 = await generatePdf(
         responseData.data,

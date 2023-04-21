@@ -144,6 +144,7 @@ exports.postToBubble = function (data) {
   } else {
     data.investmentOffer = false;
   }
+
   console.log(`Dossier sending to bubble via webhook: ${url}`);
 
   const options = {
